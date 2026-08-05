@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parenting Copilot | 育兒副駕駛 🤖👶</title>
+  <meta name="description" content="減輕假日人潮焦慮、大肌肉放電、保護媽媽喘息時間與情緒觀察的育兒副駕駛 Web 應用程式。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">👶</div>
+        <div class="brand-text">
+          <h1>Parenting Copilot</h1>
+          <p class="subtitle">育兒副駕駛 ‧ 讓家庭時光更輕鬆自在</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="me-time-badge" id="headerMeTimeBadge">
+          <span class="pulse-dot"></span> 媽媽充電中：<strong id="headerTimer">00:00</strong>
+        </div>
+        <button id="themeToggleBtn" class="icon-btn" title="切換深色/淺色主題">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Navigation Tabs -->
+  <nav class="nav-tabs">
+    <div class="nav-container">
+      <button class="tab-btn active" data-tab="planner">
+        <span class="tab-icon">🗺️</span>
+        <span class="tab-label">避人潮行程</span>
+      </button>
+      <button class="tab-btn" data-tab="ot-tasks">
+        <span class="tab-icon">🤸</span>
+        <span class="tab-label">大肌肉 OT 卡</span>
+      </button>
+      <button class="tab-btn" data-tab="me-time">
+        <span class="tab-icon">🌸</span>
+        <span class="tab-label">Me-Time 守護</span>
+      </button>
+      <button class="tab-btn" data-tab="emotion">
+        <span class="tab-icon">📝</span>
+        <span class="tab-label">情緒與進步日誌</span>
+      </button>
+      <button class="tab-btn" data-tab="skills">
+        <span class="tab-icon">🧠</span>
+        <span class="tab-label">Agent 技能庫</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content View Container -->
+  <main class="main-content">
+
+    <!-- TAB 1: Weekend Planner -->
+    <section id="tab-planner" class="tab-pane active">
+      <div class="pane-header">
+        <h2>🗺️ 假日避人潮行程規劃器</h2>
+        <p>自動過濾高擠壓警報景點，為您與孩子量身客製放電又不焦慮的完美行程。</p>
+      </div>
+
+      <div class="grid-layout">
+        <!-- Planner Input Form -->
+        <div class="card glass-card">
+          <div class="weather-widget" id="weatherWidget" style="background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); padding: 0.8rem 1rem; border-radius: 12px; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span id="weatherIcon" style="font-size:1.8rem;">📡</span>
+              <div>
+                <strong id="weatherLocationName" style="font-size:0.9rem; color:var(--secondary);">即時氣象連線中 (Open-Meteo API)...</strong>
+                <p id="weatherDetails" style="font-size:0.78rem; color:var(--text-sub);">正向氣象站抓取本週末降雨率與氣溫資料...</p>
+              </div>
+            </div>
+            <span id="weatherBadge" class="badge" style="background:var(--primary); color:#fff; font-size:0.72rem; padding:0.25rem 0.6rem; border-radius:6px;">即時連線中</span>
+          </div>
+
+          <h3>🎯 規劃偏好與區域設定</h3>
+          <form id="plannerForm">
+            <div class="form-group">
+              <label for="destination">主要守備區域</label>
+              <select id="destination" class="form-control">
+                <option value="tamsui" selected>🌊 淡水 & 北海岸 (滬尾草皮、淺水灣沙灘、三芝步道)</option>
+                <option value="newtaipei_park">🌿 新北廣闊綠地 (大台北都會公園離峰、新店陽光公園)</option>
+                <option value="indoor_exhibit">🏛️ 空間寬敞展覽館 (雨天/酷暑備案)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="childAge">人群焦慮防禦模式</label>
+              <select id="crowdMode" class="form-control">
+                <option value="strict" selected>🛡️ 極速早鳥（08:30 前抵達，11:00 前離場避人潮）</option>
+                <option value="moderate">🍃 廣闊視野腹地（大草坪/空曠海灘獨享）</option>
+              </select>
+            </div>
+
+            <div style="display:flex; gap:0.6rem; margin-top:1rem;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">
+                ✨ 產生父女半日遊雙劇本
+              </button>
+              <button type="button" id="thursdayAutoBtn" class="btn btn-secondary" title="模擬每週四自動推播企劃案">
+                🗓️ 週四自動雙劇本
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Planner Result Output -->
+        <div class="card glass-card result-card">
+          <div class="result-header">
+            <h3>📋 推薦放電企劃案</h3>
+            <button id="copyItineraryBtn" class="btn btn-secondary btn-sm">📋 複製企劃案</button>
+          </div>
+          <div id="itineraryOutput" class="itinerary-box">
+            <div class="empty-state">
+              <span>🗺️</span>
+              <p>點擊左側「產生避人潮行程規劃」，即可獲得專屬行程建議與備忘細節！</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: OT Task Generator -->
+    <section id="tab-ot-tasks" class="tab-pane">
+      <div class="pane-header">
+        <h2>🤸 大肌肉放電與 OT 遊戲卡</h2>
+        <p>提供重物搬運、本體覺輸入與遊戲化運動，有效替代討抱抱、補充肌肉放電量。</p>
+      </div>
+
+      <div class="ot-container">
+        <div class="ot-controls">
+          <button id="drawOtTaskBtn" class="btn btn-accent btn-lg glow">
+            🎲 抽出一張今日大肌肉訓練卡
+          </button>
+          <div class="filter-pills">
+            <button class="pill active" data-filter="all">全部類型</button>
+            <button class="pill" data-filter="proprioception">💪 本體覺 (討抱抱/推重物)</button>
+            <button class="pill" data-filter="vestibular">🌀 前庭覺 (平衡/跳躍)</button>
+            <button class="pill" data-filter="calm">🧘 情緒冷卻安定</button>
+          </div>
+        </div>
+
+        <div id="otTaskCardDisplay" class="ot-card-display">
+          <!-- Active Card will render here -->
+        </div>
+
+        <!-- Quick OT Emergency Guide -->
+        <div class="card glass-card emergency-box">
+          <h4>💡 當孩子猛討抱抱時的 OT 錦囊：</h4>
+          <p>討抱抱常是孩子尋求「深層本體覺」安全感。嘗試提供深層壓迫（如熊抱、大腿夾夾、推牆壁），能迅速給予大腦穩定的感官訊號。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Me-Time Guardian -->
+    <section id="tab-me-time" class="tab-pane">
+      <div class="pane-header">
+        <h2>🌸 Me-Time 專屬喘息時間守護者</h2>
+        <p>照顧者的情緒健康是全家的基礎。啟用防打擾盾牌，給予無罪惡感的個人充飽電時間。</p>
+      </div>
+
+      <div class="grid-layout">
+        <!-- Me-Time Control Panel -->
+        <div class="card glass-card text-center">
+          <h3>⚡ 喘息計時與狀態</h3>
+          
+          <div class="progress-ring-container">
+            <div class="circle-progress" id="meTimeCircle">
+              <div class="inner-circle">
+                <span class="timer-display" id="meTimeDisplay">00:00:00</span>
+                <span class="timer-status" id="meTimeStatusLabel">準備好充電了嗎？</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timer-btn-group">
+            <button id="startMeTime30" class="btn btn-outline">+ 30分鐘</button>
+            <button id="startMeTime60" class="btn btn-primary">+ 60分鐘</button>
+            <button id="stopMeTimeBtn" class="btn btn-danger" disabled>🛑 結束充電</button>
+          </div>
+
+          <div class="weekly-stats">
+            <div class="stat-item">
+              <span class="stat-val" id="weeklyHoursVal">3.5 / 5 小時</span>
+              <span class="stat-lbl">本週已完成喘息</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-val" id="streakVal">🔥 4 天</span>
+              <span class="stat-lbl">連續守護紀錄</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teammate Emergency SOP CheatSheet -->
+        <div class="card glass-card">
+          <h3>🛡️ 隊友接管應對防護罩 (SOP)</h3>
+          <p class="text-sub">當爸爸/隊友顧小孩遇到狀況時的緊急防禦錦囊：</p>
+
+          <ul class="sop-list">
+            <li>
+              <span class="sop-tag tag-red">哭鬧找媽媽</span>
+              <p>「媽媽正在神廟補充能量魔法，我們現在來做【小小工程師搬磚任務】等媽媽回來！」</p>
+            </li>
+            <li>
+              <span class="sop-tag tag-orange">歡樂失控</span>
+              <p>使用大肌肉遊戲卡第三號，轉移注意力到客廳障礙賽跑。</p>
+            </li>
+            <li>
+              <span class="sop-tag tag-green">無助時刻</span>
+              <p>先給孩子一杯溫水或一口餅乾，放輕柔音樂降溫情緒。</p>
+            </li>
+          </ul>
+
+          <button id="openDndModalBtn" class="btn btn-secondary btn-block">
+            📢 啟用「請勿打擾全螢幕告示」
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Emotion & Progress Tracker -->
+    <section id="tab-emotion" class="tab-pane">
+      <div class="pane-header">
+        <h2>📝 焦慮觸發與進步觀察日誌</h2>
+        <p>捕捉育兒中的每一個焦慮觸發點、發現什麼有效，並記錄下全家人微小的進步。</p>
+      </div>
+
+      <div class="grid-layout">
+        <!-- New Log Form -->
+        <div class="card glass-card">
+          <h3>✍️ 新增觀察日誌</h3>
+          <form id="emotionForm">
+            <div class="form-group">
+              <label for="logContext">情境 / 觸發事件</label>
+              <input type="text" id="logContext" class="form-control" placeholder="例如：晚餐前收玩具、穿鞋要出門時" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col">
+                <label for="childMood">孩子情緒狀態</label>
+                <select id="childMood" class="form-control">
+                  <option value="大叫討抱">😫 大叫/討抱</option>
+                  <option value="拒絕溝通">😤 拒絕/崩潰</option>
+                  <option value="小不安">😟 小焦慮</option>
+                  <option value="穩定進步">😊 穩定/配合</option>
+                </select>
+              </div>
+
+              <div class="form-group col">
+                <label for="parentAnxiety">家長焦慮指數 (1-5)</label>
+                <input type="range" id="parentAnxiety" min="1" max="5" value="3" class="range-control">
+                <div class="range-labels">
+                  <span>1 (冷靜)</span>
+                  <span id="rangeVal">3</span>
+                  <span>5 (爆表)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="soothingUsed">有效安撫或處理方式</label>
+              <textarea id="soothingUsed" class="form-control" rows="2" placeholder="例如：給海苔餅乾、熊抱30秒、使用OT推磚塊遊戲"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="sparkPoint">🌟 今日進步微光亮點</label>
+              <input type="text" id="sparkPoint" class="form-control" placeholder="例如：今天家長沒有跟著大聲，冷靜停頓3秒！">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">💾 儲存日誌紀錄</button>
+          </form>
+        </div>
+
+        <!-- History Logs List -->
+        <div class="card glass-card">
+          <h3>📜 觀察與進步歷史軸</h3>
+          <div id="logsHistoryList" class="logs-history-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: Agent Skills Viewer -->
+    <section id="tab-skills" class="tab-pane">
+      <div class="pane-header">
+        <h2>🧠 Agent 靈魂技能庫 (Skills Inspector)</h2>
+        <p>以下是驅動各個 Agent 思考的核心 Markdown 提示詞（Skill SOP）。您可以隨時複製或閱讀調整。</p>
+      </div>
+
+      <div class="skills-layout">
+        <div class="skills-sidebar">
+          <button class="skill-menu-item active" data-skill="weekend-planner">
+            <span>🗺️</span> weekend-planner.md
+          </button>
+          <button class="skill-menu-item" data-skill="ot-task-generator">
+            <span>🤸</span> ot-task-generator.md
+          </button>
+          <button class="skill-menu-item" data-skill="me-time-guardian">
+            <span>🌸</span> me-time-guardian.md
+          </button>
+          <button class="skill-menu-item" data-skill="emotion-tracker">
+            <span>📝</span> emotion-tracker.md
+          </button>
+        </div>
+
+        <div class="skills-viewer card glass-card">
+          <div class="viewer-header">
+            <h3 id="currentSkillTitle">weekend-planner.md</h3>
+            <button id="copySkillBtn" class="btn btn-secondary btn-sm">📋 複製 Skill 系統提示詞</button>
+          </div>
+          <pre id="skillMarkdownContent" class="markdown-preview">載入中...</pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fullscreen DND Shield Modal -->
+  <div id="dndModal" class="modal-backdrop hidden">
+    <div class="modal-card text-center">
+      <div class="modal-icon">🌸</div>
+      <h2>媽媽正在專屬充電中！</h2>
+      <p class="modal-sub">預計充電完畢時間：<strong id="dndEndTimeDisplay">16:30</strong></p>
+      <div class="modal-timer" id="dndModalTimer">00:45:00</div>
+
+      <div class="dnd-guidance">
+        <h4>🚨 隊友緊急聯絡機制：</h4>
+        <p>非緊急狀況請勿打擾神廟！緊急問題請引導孩子閱讀大肌肉任務卡。</p>
+      </div>
+
+      <button id="closeDndModalBtn" class="btn btn-primary">了解，我來守護這段時間！</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
