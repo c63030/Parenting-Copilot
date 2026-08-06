@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/line_webhook",
+      "destination": "/api/line_webhook.js"
+    }
+  ]
+}
