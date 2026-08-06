@@ -174,6 +174,41 @@ async function sendTelegram(botToken, chatId, text) {
   console.log("📲 成功將企劃推播至 Telegram！");
 }
 
+async function sendLineMessage(channelAccessToken, userId, text) {
+  if (!channelAccessToken || !userId) return;
+  
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify({
+      to: userId,
+      messages: [{ type: 'text', text: text }]
+    });
+    
+    const req = https.request({
+      hostname: 'api.line.me',
+      path: '/v2/bot/message/push',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${channelAccessToken}`,
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        console.log("🟢 LINE 推播請求回應:", res.statusCode);
+        resolve(data);
+      });
+    });
+    req.on('error', (err) => {
+      console.error("❌ LINE 推播失敗:", err);
+      reject(err);
+    });
+    req.write(postData);
+    req.end();
+  });
+}
+
 async function main() {
   console.log("🚀 開始執行週四 09:00 自動雙劇本生成腳本...");
   
@@ -212,9 +247,14 @@ async function main() {
   fs.writeFileSync(OUTPUT_FILE, planContent, 'utf-8');
   console.log(`💾 已成功備份儲存至: ${OUTPUT_FILE}`);
 
-  // Send Notifications if tokens available
+  // Send Telegram
   if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
     await sendTelegram(process.env.TELEGRAM_BOT_TOKEN, process.env.TELEGRAM_CHAT_ID, planContent);
+  }
+
+  // Send LINE
+  if (process.env.LINE_CHANNEL_ACCESS_TOKEN && process.env.LINE_USER_ID) {
+    await sendLineMessage(process.env.LINE_CHANNEL_ACCESS_TOKEN, process.env.LINE_USER_ID, planContent);
   }
 }
 
