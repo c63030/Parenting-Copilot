@@ -82,7 +82,7 @@ async function fetchLiveWeather() {
 
 // 2. Call Gemini API if Key is Available
 async function generateWithGemini(apiKey, skillPrompt, weather) {
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const modelName = process.env.GEMINI_MODEL || "gemini-3.6-flash";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   const userPrompt = `
