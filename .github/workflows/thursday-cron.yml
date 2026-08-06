@@ -1,0 +1,37 @@
+name: 每週四 09:00 自動生成避人潮雙劇本企劃案
+
+on:
+  schedule:
+    # 每週四 台灣時間早上 09:00 (UTC 時間 01:00)
+    - cron: '0 1 * * 4'
+  workflow_dispatch: # 支援在 GitHub 網頁手動點擊「Run workflow」隨時測試
+
+jobs:
+  generate-dual-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 檢出最新程式碼
+        uses: actions/checkout@v4
+
+      - name: 🟢 設定 Node.js 環境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🚀 執行 AI 氣象與雙劇本生成器
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LINE_NOTIFY_TOKEN: ${{ secrets.LINE_NOTIFY_TOKEN }}
+        run: |
+          node scripts/generate_thursday_script.js
+
+      - name: 💾 自動將生成紀錄 Commit 存回專案歷史
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest_thursday_plan.md 2>/dev/null || true
+          git commit -m "auto: 週四 09:00 自動雙劇本備份 [skip ci]" 2>/dev/null || true
+          git push origin main 2>/dev/null || true
