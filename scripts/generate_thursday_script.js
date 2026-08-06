@@ -81,12 +81,17 @@ async function fetchLiveWeather() {
 }
 
 // 2. Call Gemini API if Key is Available
-async function generateWithGemini(apiKey, skillPrompt, weather) {
+async function generateWithGemini(apiKey, skillPrompt, weather, weeklyNotes = []) {
   const modelName = process.env.GEMINI_MODEL || "gemini-3.6-flash";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
+  let notesContext = "無特殊記錄，採用標準討抱與大肌肉放電設定。";
+  if (weeklyNotes && weeklyNotes.length > 0) {
+    notesContext = weeklyNotes.map((n, i) => `${i + 1}. [${n.timestamp.split('T')[0]}] ${n.text}`).join('\n');
+  }
+
   const userPrompt = `
-請根據以下系統 Skill 規則，並結合本週末最新氣象預報，為使用者生成一份最新「本週末父女半日遊防空窗避人潮企劃案」：
+請根據以下系統 Skill 規則，結合本週末最新氣象預報，以及夫妻倆本週在 LINE 隨手記錄的【日常育兒觀察筆記】，為使用者生成一份專屬客製化「本週末父女半日遊防空窗避人潮企劃案」：
 
 [本週末最新氣象資訊]
 - 區域：淡水 / 北海岸 / 新北
@@ -94,7 +99,10 @@ async function generateWithGemini(apiKey, skillPrompt, weather) {
 - 預估氣溫：${weather.minTemp}°C - ${weather.maxTemp}°C
 - 降雨機率：${weather.rainProb}% (${weather.desc})
 
-請完全依據 Skill 中的風格與規格輸出（包含方案 A、方案 B、行事曆 Actions）。
+[本週夫妻實體育兒觀察隨身筆記 (用於動態提取 {{daughter_status}})]
+${notesContext}
+
+請從上述筆記中精準分析並提取女兒本週的情緒、肢體與討抱/避人焦慮狀況（作為 {{daughter_status}}），並完全依據 Skill 中的規格輸出包含方案 A、方案 B 與 4 個針對性 OT 遊戲的雙劇本！
   `;
 
   const payload = {
@@ -224,13 +232,23 @@ async function main() {
   const weather = await fetchLiveWeather();
   console.log(`🌤️ 氣象取得成功: ${weather.date}, ${weather.minTemp}-${weather.maxTemp}°C, 降雨機率 ${weather.rainProb}%`);
 
+  // Read Weekly Notes
+  const NOTES_FILE = path.join(PROJECT_DIR, 'data', 'parenting_notes.json');
+  let weeklyNotes = [];
+  if (fs.existsSync(NOTES_FILE)) {
+    try {
+      weeklyNotes = JSON.parse(fs.readFileSync(NOTES_FILE, 'utf-8'));
+      console.log(`📝 成功讀取到本週 ${weeklyNotes.length} 條日常育兒觀察筆記！`);
+    } catch (e) {}
+  }
+
   let planContent = null;
   
   // Try Gemini API if Key Exists
   const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey) {
     console.log("🤖 檢測到 GEMINI_API_KEY，正在呼叫 Google Gemini API 智慧生成...");
-    planContent = await generateWithGemini(apiKey, skillPrompt, weather);
+    planContent = await generateWithGemini(apiKey, skillPrompt, weather, weeklyNotes);
   }
 
   if (!planContent) {
