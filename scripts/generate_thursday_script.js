@@ -82,7 +82,8 @@ async function fetchLiveWeather() {
 
 // 2. Call Gemini API if Key is Available
 async function generateWithGemini(apiKey, skillPrompt, weather) {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   const userPrompt = `
 請根據以下系統 Skill 規則，並結合本週末最新氣象預報，為使用者生成一份最新「本週末父女半日遊防空窗避人潮企劃案」：
