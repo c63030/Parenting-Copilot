@@ -116,14 +116,18 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const events = req.body.events || [];
+    let body = req.body || {};
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (e) {}
+    }
+    const events = body.events || [];
     for (const event of events) {
       if (event.type === 'message' && event.message.type === 'text') {
         const userText = event.message.text.trim();
         const replyToken = event.replyToken;
 
         // Save to GitHub
-        await saveNoteToGithub(userText, event.source.userId);
+        await saveNoteToGithub(userText, event.source ? event.source.userId : "User");
 
         // Reply confirmation to LINE group
         await replyLineMessage(replyToken, `📝 已幫您記錄至本週育兒隨身筆記：\n「${userText}」\n\n週四早上 09:00 AI 將自動彙整並客製化週末放電企劃！`);
@@ -132,6 +136,6 @@ module.exports = async (req, res) => {
     return res.status(200).json({ status: 'ok' });
   } catch (err) {
     console.error("Webhook Handler Error:", err);
-    return res.status(500).json({ error: err.message });
+    return res.status(200).json({ status: 'ok', warning: err.message });
   }
 };
