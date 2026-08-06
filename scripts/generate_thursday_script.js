@@ -266,6 +266,16 @@ async function main() {
   fs.writeFileSync(OUTPUT_FILE, planContent, 'utf-8');
   console.log(`💾 已成功備份儲存至: ${OUTPUT_FILE}`);
 
+  // Clear weekly notes after successful generation so new week starts fresh
+  if (fs.existsSync(NOTES_FILE) && weeklyNotes.length > 0) {
+    try {
+      fs.writeFileSync(NOTES_FILE, '[]', 'utf-8');
+      console.log("🧹 已重置本週育兒筆記，開啟下週全新收集！");
+    } catch (e) {
+      console.error("無法重置筆記檔案:", e);
+    }
+  }
+
   // Send Telegram
   if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
     await sendTelegram(process.env.TELEGRAM_BOT_TOKEN, process.env.TELEGRAM_CHAT_ID, planContent);
