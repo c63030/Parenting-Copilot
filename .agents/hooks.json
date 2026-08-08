@@ -1,0 +1,19 @@
+{
+  "git-push-fail-safe": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 .agents/scripts/check_git_status.py",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .agents/scripts/check_git_status.py",
+        "timeout": 5
+      }
+    ]
+  }
+}
